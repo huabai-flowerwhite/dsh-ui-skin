@@ -1,0 +1,12 @@
+# dsh ui skin — host composition patch（工具全局 + Client 皮肤 UI 全局）
+#
+# 把 dsh-ui-skin 挂到 host composition（web profile）：
+#   - Host 半体（skin_list 工具 + /dsh-ui-skin/skins 路由）→ 全局
+#   - Client 半体（背景层 + Settings 设置页）→ 全局 UI（dsh-client-modules 扫描 dsh.client）
+#
+# 前置：dsh-ui-skin 必须是 node_modules 可解析的包
+#       （$DSH_HOME/profiles/node_modules/dsh-ui-skin -> 包目录）。
+# 仅新增能力，故只 insert 一行自己的 row，不替换任何 Core row（DH-TP-SDK §15）。
+- insert:
+    - id: dsh-ui-skin
+      name: 'dsh-ui-skin'
