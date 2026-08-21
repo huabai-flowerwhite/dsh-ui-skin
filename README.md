@@ -4,6 +4,16 @@
 
 > 依据 DH-TP-SDK（`DeepSeek-Harness-Third-Party-Plugin-SDK-Specification.md`）工程化第三方插件规范落地。Bronze/Silver/Gold、P0–P4、S0–S4 均非 DeepSeek 官方认证。
 
+## 使用
+
+1. 安装后重启 dsh，打开 **设置 → UI 皮肤** 切换皮肤与参数（配置持久化到浏览器 `localStorage`）。
+2. 「自定义」里可填网络地址，或点「选择图片/视频」从本地文件夹选取；拖动预览区裁剪位置、滚轮缩放；上传自动进「历史皮肤」；点「展开悬浮窗」弹出可拖动快捷面板。
+3. 聊天框中可调用 `skin_list` 查看皮肤清单。
+
+   ![How‑to Showcase1](<How‑to Showcase1.png>)
+
+   ![How‑to Showcase2](<How‑to Showcase2.png>)
+
 ## 皮肤清单
 
 | id | 名称 | 类型 | 说明 |
@@ -45,12 +55,6 @@ dsh-ui-skin/
 - **存储**：配置与图片历史存 `localStorage`（图片压缩为 1920px JPEG）；视频 Blob 存 IndexedDB。
 
 完整的技术决策与踩坑记录见 [design.md §7](./design.md)。
-
-## 使用
-
-1. 安装后重启 dsh，打开 **设置 → UI 皮肤** 切换皮肤与参数（配置持久化到浏览器 `localStorage`）。
-2. 「自定义」里可填网络地址，或点「选择图片/视频」从本地文件夹选取；拖动预览区裁剪位置、滚轮缩放；上传自动进「历史皮肤」；点「展开悬浮窗」弹出可拖动快捷面板。
-3. 聊天框中可调用 `skin_list` 查看皮肤清单。
 
 ## 安装（一条命令）
 
