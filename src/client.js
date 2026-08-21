@@ -104,6 +104,39 @@ function addHistory(item) {
   saveHistory(list)
 }
 
+function snapshotOf(cfg) {
+  return {
+    scale: cfg.scale, offsetX: cfg.offsetX, offsetY: cfg.offsetY,
+    opacity: cfg.opacity, blur: cfg.blur, mask: cfg.mask, customKind: cfg.customKind,
+  }
+}
+
+function syncHistorySnapshot(cfg) {
+  if (!cfg || cfg.skin !== 'custom' || !cfg.customUrl) return
+  const list = loadHistory()
+  let changed = false
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].customUrl === cfg.customUrl) {
+      list[i].scale = cfg.scale
+      list[i].offsetX = cfg.offsetX
+      list[i].offsetY = cfg.offsetY
+      list[i].opacity = cfg.opacity
+      list[i].blur = cfg.blur
+      list[i].mask = cfg.mask
+      list[i].customKind = cfg.customKind
+      changed = true
+      break
+    }
+  }
+  if (changed) saveHistory(list)
+}
+
+let syncTimer = null
+function scheduleHistorySync(cfg) {
+  if (syncTimer) clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => syncHistorySnapshot(cfg), 300)
+}
+
 function idbOpen() {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') { reject(new Error('no indexedDB')); return }
@@ -231,6 +264,7 @@ function createBackgroundEngine(theme) {
     for (const k of Object.keys(base)) if (next && next[k] !== undefined) base[k] = next[k]
     cfg = base
     saveConfig(cfg)
+    scheduleHistorySync(cfg)
     applyTokenOverride(cfg.skin !== 'none')
     if (layer) {
       layer.style.opacity = clamp(cfg.opacity, 0, 1).toFixed(3)
@@ -364,7 +398,7 @@ function SettingsPanel(props) {
       idbPut(vid, file).then(() => {
         const mark = VIDEO_PREFIX + vid
         update({ customKind: 'video', customUrl: mark })
-        addHistory({ id: vid, name, kind: 'video', ts: Date.now(), customUrl: mark })
+        addHistory({ ...{ id: vid, name, kind: 'video', ts: Date.now(), customUrl: mark }, ...snapshotOf(cfgRef.current) })
         setHistory(loadHistory())
         setBusy(false)
       }).catch(() => setBusy(false))
@@ -373,7 +407,7 @@ function SettingsPanel(props) {
       compressImage(file, 1920, (dataUrl) => {
         if (dataUrl) {
           update({ customKind: 'wallpaper', customUrl: dataUrl })
-          addHistory({ id: nowId('img'), name, kind: 'image', ts: Date.now(), customUrl: dataUrl })
+          addHistory({ ...{ id: nowId('img'), name, kind: 'image', ts: Date.now(), customUrl: dataUrl }, ...snapshotOf(cfgRef.current) })
           setHistory(loadHistory())
         }
         setBusy(false)
@@ -383,7 +417,18 @@ function SettingsPanel(props) {
   }
 
   function applyHistory(item) {
-    update({ skin: 'custom', customKind: item.kind === 'video' ? 'video' : 'wallpaper', customUrl: item.customUrl })
+    const patch = {
+      skin: 'custom',
+      customKind: item.customKind || (item.kind === 'video' ? 'video' : 'wallpaper'),
+      customUrl: item.customUrl,
+    }
+    if (item.scale !== undefined) patch.scale = item.scale
+    if (item.offsetX !== undefined) patch.offsetX = item.offsetX
+    if (item.offsetY !== undefined) patch.offsetY = item.offsetY
+    if (item.opacity !== undefined) patch.opacity = item.opacity
+    if (item.blur !== undefined) patch.blur = item.blur
+    if (item.mask !== undefined) patch.mask = item.mask
+    update(patch)
   }
 
   function onPreviewMouseDown(e) {
